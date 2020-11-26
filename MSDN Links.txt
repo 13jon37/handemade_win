@@ -1,0 +1,27 @@
+Documentation:
+
+WinMain
+https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-winmain
+https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-wndclassa
+https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-createwindowexa
+https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-defwindowproca
+
+Screen Rendering
+https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-stretchdibits
+https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfo
+
+Things needed for rendering
+https://docs.microsoft.com/en-us/previous-versions/dd183376(v=vs.85)
+https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowrect
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualalloc
+https://docs.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualfree
+
+https://docs.microsoft.com/en-us/windows/win32/api/profileapi/nf-profileapi-queryperformancecounter
+https://docs.microsoft.com/en-us/windows/win32/api/profileapi/nf-profileapi-queryperformancefrequency
+https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getcursorpos
+https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-screentoclient
+
+
+Controller Support
+https://docs.microsoft.com/en-us/windows/win32/api/xinput/nf-xinput-xinputgetstate
+https://docs.microsoft.com/en-us/windows/win32/api/xinput/ns-xinput-xinput_gamepad
