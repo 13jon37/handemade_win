@@ -3,6 +3,29 @@
 #ifndef HANDMADE_H
 #define HANDMADE_H
 
+/*
+ NOTE(Jon): 
+HANDMADE_INTERNAL:
+0 - Build for public release
+1 - Build for devleoper only
+
+HANDMADE_SLOW:
+0 - No slow code allowed!
+1 - Slow code welcome!
+*/
+
+#if HANDEMADE_SLOW
+#define Assert(expression) if (!(expression)) {*(int*)0 = 0;}
+#else
+#define Assert(expression)
+#endif
+// If expression isn't true right to null pointer and crash the program
+
+#define Kilobytes(value) ((value)*1024)
+#define Megabytes(value) (Kilobytes(value)*1024)
+#define Gigabytes(value) (Megabytes(value)*1024)
+#define Terabytes(value) (Gigabytes(value)*1024)
+
 #define array_count(array) (sizeof(array) / sizeof((array)[0]))
 
 // TODO(1337): Services that the game platform layer provides to the game.
@@ -70,7 +93,26 @@ struct game_input_t
     
 };
 
+struct game_memory_t 
+{
+    b32 is_initialized;
+    u64 permanent_storage_size;
+    void* permanent_storage; // NOTE(Jon): Required to be cleared to zero at startup
+    u64 transient_storage_size;
+    void* transient_storage;
+    
+};
+
 internal void 
-game_update_and_render(game_input_t* input, game_offscreen_buffer* buffer,  game_sound_output_buffer* sound_buffer);
+game_update_and_render(game_memory_t* memoryu, game_input_t* input, game_offscreen_buffer* buffer,  game_sound_output_buffer* sound_buffer);
+
+//////
+
+struct game_state_t
+{
+    int tone_hz;
+    int green_offset;
+    int blue_offset;
+};
 
 #endif //HANDMADE_H

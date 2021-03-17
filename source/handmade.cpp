@@ -52,18 +52,26 @@ Pixel (32 bits)
 }
 
 internal void
-game_update_and_render(game_input_t* input, game_offscreen_buffer* buffer, game_sound_output_buffer* sound_buffer)
+game_update_and_render(game_memory_t* memory, game_input_t* input, game_offscreen_buffer* buffer, game_sound_output_buffer* sound_buffer)
 {
-    local_persist int blue_offset = 0;
-    local_persist int green_offset = 0;
-    local_persist int tone_hz = 256;
+    Assert(sizeof(game_state_t) <= memory->permanent_storage_size);
+    
+    game_state_t* game_state = (game_state_t*)memory->permanent_storage;
+    if (!memory->is_initialized)
+    {
+        game_state->tone_hz = 256;
+        game_state->green_offset = 0;
+        game_state->blue_offset = 0;
+        
+        memory->is_initialized = true;
+    }
     
     game_controller_input_t* input_0 = &input->controllers[0];
     if (input_0->is_analog)
     {
         // NOTE(Jon): Use analog movement tuning
-        blue_offset += (int)4.0f * (input_0->end_x);
-        tone_hz = 256 + (int)(128.0f * (input_0->end_y));
+        game_state->blue_offset += (int)4.0f * (input_0->end_x);
+        game_state->tone_hz = 256 + (int)(128.0f * (input_0->end_y));
     }
     else
     {
@@ -72,10 +80,10 @@ game_update_and_render(game_input_t* input, game_offscreen_buffer* buffer, game_
     
     if (input_0->down.ended_down)
     {
-        green_offset += 1;
+        game_state->green_offset += 1;
     }
     
     // TODO(1337): Allow sample offsets here for more robust platform options
-    game_output_sound(sound_buffer, tone_hz);
-    render_weird_gradient(buffer, blue_offset, green_offset);
+    game_output_sound(sound_buffer, game_state->tone_hz);
+    render_weird_gradient(buffer, game_state->blue_offset, game_state->green_offset);
 }
