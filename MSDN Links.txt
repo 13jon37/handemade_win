@@ -21,7 +21,11 @@ https://docs.microsoft.com/en-us/windows/win32/api/profileapi/nf-profileapi-quer
 https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getcursorpos
 https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-screentoclient
 
-
 Controller Support
 https://docs.microsoft.com/en-us/windows/win32/api/xinput/nf-xinput-xinputgetstate
 https://docs.microsoft.com/en-us/windows/win32/api/xinput/ns-xinput-xinput_gamepad
+
+Reading & Writing Files
+https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea 
+https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfilesize
+https://docs.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile

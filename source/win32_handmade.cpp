@@ -35,7 +35,7 @@
 
 // NOTE(1337): a global for now
 global_variable bool global_running; 
-global_variable win32_offscreen_buffer global_back_buffer;
+global_variable win32_offscreen_buffer_t global_back_buffer;
 global_variable LPDIRECTSOUNDBUFFER global_secondary_buffer;
 
 // NOTE(1337):  XInputGetState
@@ -60,6 +60,88 @@ global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
 
 #define DIRECT_SOUND_CREATE(name) HRESULT WINAPI (name)(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);
 typedef DIRECT_SOUND_CREATE(direct_sound_create);
+
+internal debug_read_file_result_t 
+DEBUG_platform_read_entire_file(char *file_name)
+{
+    debug_read_file_result_t result = { 0 };
+    HANDLE file_handle =  CreateFileA(file_name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    if (file_handle != INVALID_HANDLE_VALUE)
+    {
+        LARGE_INTEGER file_size;
+        if (GetFileSizeEx(file_handle, &file_size))
+        {
+            i32 file_size_32 = safe_truncate_u64(file_size.QuadPart);
+            result.contents = VirtualAlloc(0, file_size.QuadPart, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+            if (result.contents)
+            {
+                DWORD bytes_read;
+                if (ReadFile(file_handle, result.contents, file_size_32, &bytes_read, 0) &&
+                    (file_size_32 == bytes_read))
+                {
+                    // NOTE(Jon): File read successfully
+                    result.content_size = file_size_32;
+                }
+                else
+                {
+                    // TODO(Jon): Logging
+                    DEBUG_platform_free_file_memory(result.contents);
+                    result.contents = 0;
+                }
+            }
+            else
+            {
+                // TODO(Jon): Logging
+            }
+        }
+        else
+        {
+            // TODO(Jon): Logging
+        }
+        CloseHandle(file_handle);
+    }
+    else
+    {
+        // TODO(Jon): Logging
+    }
+    
+    return result;
+}
+
+internal void
+DEBUG_platform_free_file_memory(void *memory)
+{
+    if (memory)
+        VirtualFree(memory, 0, MEM_RELEASE);
+}
+
+internal b32
+DEBUG_platform_write_entire_file(char *file_name, u32 memory_size, void *memory)
+{
+    b32 result = false;
+    
+    HANDLE file_handle =  CreateFileA(file_name, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+    if (file_handle != INVALID_HANDLE_VALUE)
+    {
+        
+        DWORD bytes_written;
+        if (WriteFile(file_handle, memory, memory_size, &bytes_written, 0))
+        {
+            // NOTE(Jon): File written successfully
+            result = (bytes_written == memory_size);
+        }
+        else
+        {
+            // TODO(Jon): Logging
+        }
+    }
+    else
+    {
+        // TODO(Jon): Logging
+    }
+    
+    return result;
+}
 
 internal void
 win32_load_input(void)
@@ -162,10 +244,10 @@ win32_init_dsound(HWND window, i32 samples_per_second, i32 buffer_size)
     }
 }
 
-internal win32_window_dimension
+internal win32_window_dimension_t
 get_window_dimension(HWND window)
 {
-    win32_window_dimension result;
+    win32_window_dimension_t result;
     
     RECT client_rect;
     GetClientRect(window, &client_rect); 
@@ -176,7 +258,7 @@ get_window_dimension(HWND window)
 }
 
 internal void
-win32_resize_dib_section(win32_offscreen_buffer* buffer, int width, int height)
+win32_resize_dib_section(win32_offscreen_buffer_t *buffer, int width, int height)
 {
     if (buffer->memory)
     {
@@ -201,15 +283,11 @@ win32_resize_dib_section(win32_offscreen_buffer* buffer, int width, int height)
 }
 
 internal void
-win32_disply_buffer_in_window(win32_offscreen_buffer* buffer, HDC device_context, 
+win32_disply_buffer_in_window(win32_offscreen_buffer_t  *buffer, HDC device_context, 
                               int window_width, int window_height,
                               int x, int y, int width, int height)
 {
     StretchDIBits(device_context,
-                  /*
-                  x, y, width, height, 
-                  x, y, width, height,
-    */
                   0, 0, window_width, window_height,
                   0, 0, buffer->width, buffer->height,
                   buffer->memory,
@@ -227,7 +305,7 @@ win32_main_window_callback(HWND   window,
     LRESULT result = 0; 
     
     switch (message)
-    {
+    { 
         case WM_SIZE: 
         {
             OutputDebugStringA("WM_SIZE\n");
@@ -332,7 +410,7 @@ win32_main_window_callback(HWND   window,
             int height = paint.rcPaint.bottom - paint.rcPaint.top;
             int width = paint.rcPaint.right - paint.rcPaint.left;
             
-            win32_window_dimension dimension = get_window_dimension(window);
+            win32_window_dimension_t dimension = get_window_dimension(window);
             win32_disply_buffer_in_window(&global_back_buffer, device_context, 
                                           dimension.width, dimension.height,
                                           x, y, width, height);
@@ -352,7 +430,7 @@ win32_main_window_callback(HWND   window,
 }
 
 internal void
-win32_clear_buffer(win32_sound_output* sound_output)
+win32_clear_buffer(win32_sound_output_t *sound_output)
 {
     VOID* region1;
     DWORD region1_size;
@@ -381,7 +459,7 @@ win32_clear_buffer(win32_sound_output* sound_output)
 }
 
 internal void
-win32_fill_sound_buffer(win32_sound_output* sound_output, DWORD byte_to_lock, DWORD bytes_to_write, game_sound_output_buffer* source_buffer)
+win32_fill_sound_buffer(win32_sound_output_t *sound_output, DWORD byte_to_lock, DWORD bytes_to_write, game_sound_output_buffer_t *source_buffer)
 {
     VOID* region1;
     DWORD region1_size;
@@ -417,7 +495,7 @@ win32_fill_sound_buffer(win32_sound_output* sound_output, DWORD byte_to_lock, DW
 }
 
 internal void
-process_xinput_digital_button(DWORD xinput_button_state, game_button_state_t* old_state, DWORD button_bit, game_button_state_t* new_state)
+process_xinput_digital_button(DWORD xinput_button_state, game_button_state_t *old_state, DWORD button_bit, game_button_state_t *new_state)
 {
     new_state->ended_down = ((xinput_button_state & button_bit) == button_bit);
     new_state->half_transition_count = (old_state->ended_down != new_state->ended_down) ? 1 : 0;
@@ -463,7 +541,7 @@ WinMain(HINSTANCE instance,
         {
             HDC device_context = GetDC(window);
             
-            win32_sound_output sound_output = { };
+            win32_sound_output_t sound_output = { 0 };
             
             sound_output.sample_per_second = 48000;
             sound_output.running_sample_index = 0;
@@ -616,13 +694,12 @@ WinMain(HINSTANCE instance,
                         sound_is_valid = true;
                     }
                     
-                    
-                    game_sound_output_buffer sound_buffer = { 0 };
+                    game_sound_output_buffer_t sound_buffer = { 0 };
                     sound_buffer.samples_per_second = sound_output.sample_per_second;
                     sound_buffer.sample_count = bytes_to_write / sound_output.bytes_per_sample;
                     sound_buffer.samples = samples;
                     
-                    game_offscreen_buffer game_buffer = { 0 };
+                    game_offscreen_buffer_t game_buffer = { 0 };
                     game_buffer.memory = global_back_buffer.memory;
                     game_buffer.width = global_back_buffer.width;
                     game_buffer.height = global_back_buffer.height;
@@ -635,7 +712,7 @@ WinMain(HINSTANCE instance,
                         win32_fill_sound_buffer(&sound_output, byte_to_lock, bytes_to_write, &sound_buffer);
                     }
                     
-                    win32_window_dimension dimension = get_window_dimension(window);
+                    win32_window_dimension_t dimension = get_window_dimension(window);
                     win32_disply_buffer_in_window(&global_back_buffer, device_context, dimension.width, dimension.height, 0, 0, dimension.width, dimension.height);
                     
                     i64 end_cycle_count =  __rdtsc();

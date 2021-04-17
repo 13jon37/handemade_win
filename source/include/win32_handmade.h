@@ -3,7 +3,7 @@
 #ifndef WIN32_HANDMADE_H
 #define WIN32_HANDMADE_H
 
-struct win32_offscreen_buffer 
+struct win32_offscreen_buffer_t
 {
     BITMAPINFO info;
     void* memory;
@@ -13,13 +13,13 @@ struct win32_offscreen_buffer
     int bytes_per_pixel;
 };
 
-struct win32_window_dimension 
+struct win32_window_dimension_t
 {
     int width;
     int height;
 };
 
-struct win32_sound_output 
+struct win32_sound_output_t
 {
     // NOTE(1337): for sound test
     int sample_per_second;
