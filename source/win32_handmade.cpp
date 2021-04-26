@@ -17,7 +17,7 @@
 - GetKeyBoardLayout
 */
 
-// NOTE(Jon): Next Ep: 15
+// NOTE(Jon): Next Ep: 16
 
 #include <Windows.h>
 #include <xinput.h>
@@ -62,7 +62,7 @@ global_variable x_input_set_state* XInputSetState_ = XInputSetStateStub;
 typedef DIRECT_SOUND_CREATE(direct_sound_create);
 
 internal debug_read_file_result_t 
-DEBUG_platform_read_entire_file(char *file_name)
+DEBUG_platform_read_entire_file(const char *file_name)
 {
     debug_read_file_result_t result = { 0 };
     HANDLE file_handle =  CreateFileA(file_name, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
@@ -77,7 +77,7 @@ DEBUG_platform_read_entire_file(char *file_name)
             {
                 DWORD bytes_read;
                 if (ReadFile(file_handle, result.contents, file_size_32, &bytes_read, 0) &&
-                    (file_size_32 == bytes_read))
+                    ((DWORD)file_size_32 == bytes_read))
                 {
                     // NOTE(Jon): File read successfully
                     result.content_size = file_size_32;
@@ -116,7 +116,7 @@ DEBUG_platform_free_file_memory(void *memory)
 }
 
 internal b32
-DEBUG_platform_write_entire_file(char *file_name, u32 memory_size, void *memory)
+DEBUG_platform_write_entire_file(const char *file_name, u32 memory_size, void *memory)
 {
     b32 result = false;
     

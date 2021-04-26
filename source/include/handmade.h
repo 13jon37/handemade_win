@@ -48,9 +48,9 @@ struct debug_read_file_result_t
 };
 
 // NOTE(1337): Services that the game platform layer provides to the game.
-internal debug_read_file_result_t DEBUG_platform_read_entire_file(char *file_name);
+internal debug_read_file_result_t DEBUG_platform_read_entire_file(const char *file_name);
 internal void DEBUG_platform_free_file_memory(void *memory);
-internal b32 DEBUG_platform_write_entire_file(char *file_name, u32 memory_size, void *memory);
+internal b32 DEBUG_platform_write_entire_file(const char *file_name, u32 memory_size, void *memory);
 #endif
 
 // NOTE(1337): Services that the game provides to the platform layer.

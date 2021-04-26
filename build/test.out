@@ -63,7 +63,7 @@ game_update_and_render(game_memory_t *memory, game_input_t *input, game_offscree
         game_state->green_offset = 0;
         game_state->blue_offset = 0;
         
-        char *file_name = __FILE__;
+        const char *file_name = __FILE__;
         
         debug_read_file_result_t file = DEBUG_platform_read_entire_file(file_name);
         if (file.contents)
@@ -93,6 +93,15 @@ game_update_and_render(game_memory_t *memory, game_input_t *input, game_offscree
     }
     
     // TODO(1337): Allow sample offsets here for more robust platform options
-    game_output_sound(sound_buffer, game_state->tone_hz);
-    render_weird_gradient(buffer, game_state->blue_offset, game_state->green_offset);
+    
+    try 
+    {
+        game_output_sound(sound_buffer, game_state->tone_hz);
+        render_weird_gradient(buffer, game_state->blue_offset, game_state->green_offset);
+    }
+    catch(...)
+    {
+        
+    }
+    
 }

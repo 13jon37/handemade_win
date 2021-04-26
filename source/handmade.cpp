@@ -63,7 +63,7 @@ game_update_and_render(game_memory_t *memory, game_input_t *input, game_offscree
         game_state->green_offset = 0;
         game_state->blue_offset = 0;
         
-        char *file_name = __FILE__;
+        const char *file_name = __FILE__;
         
         debug_read_file_result_t file = DEBUG_platform_read_entire_file(file_name);
         if (file.contents)
